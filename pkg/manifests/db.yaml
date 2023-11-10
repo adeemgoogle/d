@@ -1,0 +1,9 @@
+---
+- name: PORT
+  value: 5432
+- name: HOST
+  value: localhost
+- name: PASSWORD
+  value: 123
+- name: USERNAME
+  value: "postgres"

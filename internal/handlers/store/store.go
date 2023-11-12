@@ -3,7 +3,6 @@ package store
 import (
 	"github.com/jmoiron/sqlx"
 	"tz/internal/models"
-	"tz/pkg/database"
 )
 
 type AuthorDB struct {
@@ -115,7 +114,7 @@ func (a *AuthorDB) UpdAuthors(updauthor int, upd models.Author) error {
 
 }
 func (a *AuthorDB) UpdBook(updbook int, upd models.Book) error {
-	_, err := database.Db.Exec("UPDATE book SET id=$1 ,title=$2, genre=$3, isbn=$4, authorid= $5, memberid=$6 where id=$7", upd.ID, upd.Title, upd.Genre, upd.ISBN, upd.AuthorID, upd.MemberID, updbook)
+	_, err := a.DB.Exec("UPDATE book SET id=$1 ,title=$2, genre=$3, isbn=$4, authorid= $5, memberid=$6 where id=$7", upd.ID, upd.Title, upd.Genre, upd.ISBN, upd.AuthorID, upd.MemberID, updbook)
 	if err != nil {
 		return err
 	}
@@ -123,7 +122,7 @@ func (a *AuthorDB) UpdBook(updbook int, upd models.Book) error {
 
 }
 func (a *AuthorDB) UpdMember(updbook int, upd models.Member) error {
-	_, err := database.Db.Exec("UPDATE members SET id=$1 ,fullname=$2 where id=$3", upd.MemberID, upd.FullName, updbook)
+	_, err := a.DB.Exec("UPDATE members SET id=$1 ,fullname=$2 where id=$3", upd.MemberID, upd.FullName, updbook)
 	if err != nil {
 		return err
 	}
@@ -132,7 +131,7 @@ func (a *AuthorDB) UpdMember(updbook int, upd models.Member) error {
 }
 func (a *AuthorDB) AuthorsBook(bookId int) ([]models.Book, error) {
 	var book []models.Book
-	err := database.Db.Select(&book, "Select id, title, authorid, memberid from book where authorid=$1", bookId)
+	err := a.DB.Select(&book, "Select id, title, authorid, memberid from book where authorid=$1", bookId)
 	if err != nil {
 		panic(err)
 	}
@@ -140,7 +139,7 @@ func (a *AuthorDB) AuthorsBook(bookId int) ([]models.Book, error) {
 }
 func (a *AuthorDB) MembersBook(bookId int) ([]models.Book, error) {
 	var book []models.Book
-	err := database.Db.Select(&book, "Select id, title, genre, isbn, authorid, memberid from book where authorid=$1", bookId)
+	err := a.DB.Select(&book, "Select id, title, genre, isbn, authorid, memberid from book where authorid=$1", bookId)
 	if err != nil {
 		panic(err)
 	}

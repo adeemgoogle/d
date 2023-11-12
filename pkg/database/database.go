@@ -4,24 +4,33 @@ import (
 	"fmt"
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
-	"log"
-
-	"tz/pkg/config"
+	"os"
 )
 
 var Db *sqlx.DB
 
-func init() {
-	config := config.Get()
-	var err error
-	Db, err := sqlx.Connect("postgres", fmt.Sprintf("user=%s password=%s dbname=%s host=%s port=%s sslmode=disable"), config.UserName, config.Password, config.DataBaseName, config.Host, config.Port)
-
-	if err != nil {
-		log.Fatal(err)
+func InitDB() *sqlx.DB {
+	if Db != nil {
+		return Db
 	}
+
+	dbHost := os.Getenv("HOST")
+	dbPort := os.Getenv("PORT")
+	dbUser := os.Getenv("USER")
+	dbPassword := os.Getenv("PASSWORD")
+	dbName := os.Getenv("DATABASENAME")
+
+	dbURL := fmt.Sprintf("user=%s password=%s dbname=%s host=%s port=%s sslmode=disable", dbUser, dbPassword, dbName, dbHost, dbPort)
+
+	Db, err := sqlx.Connect("postgres", dbURL)
+	if err != nil {
+		fmt.Println(err)
+	}
+
 	err = Db.Ping()
 	if err != nil {
-		log.Fatal(err)
+		panic(err)
 	}
+	return Db
 
 }

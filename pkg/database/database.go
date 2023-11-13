@@ -1,36 +1,26 @@
 package database
 
 import (
-	"fmt"
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
-	"os"
+	"log"
+	"tz/pkg/config"
 )
 
-var Db *sqlx.DB
+var DBUrl *sqlx.DB
 
-func InitDB() *sqlx.DB {
-	if Db != nil {
-		return Db
-	}
-
-	dbHost := os.Getenv("HOST")
-	dbPort := os.Getenv("PORT")
-	dbUser := os.Getenv("USER")
-	dbPassword := os.Getenv("PASSWORD")
-	dbName := os.Getenv("DATABASENAME")
-
-	dbURL := fmt.Sprintf("user=%s password=%s dbname=%s host=%s port=%s sslmode=disable", dbUser, dbPassword, dbName, dbHost, dbPort)
-
-	Db, err := sqlx.Connect("postgres", dbURL)
+func InitDB() (*sqlx.DB, error) {
+	conf, err := config.LoadConfig()
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err.Error())
+		return nil, err
 	}
 
-	err = Db.Ping()
+	DBUrl, err = sqlx.Open("postgres", conf.DB)
 	if err != nil {
-		panic(err)
+		log.Println(err.Error())
+		return nil, err
 	}
-	return Db
+	return DBUrl, nil
 
 }

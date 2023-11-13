@@ -1,11 +1,25 @@
 package config
 
+import "github.com/spf13/viper"
+
 type Config struct {
-	Database struct {
-		Host     string `yaml:"HOST"`
-		Port     string `yaml:"PORT"`
-		Username string `yaml:"USERNAME"`
-		Password string `yaml:"PASSWORD"`
-		DBName   string `yaml:"DATABASENAME"`
-	} `yaml:"database"`
+	DB string `mapstructure:"DB"`
+}
+
+func LoadConfig() (*Config, error) {
+	config := new(Config)
+
+	v := viper.New()
+	v.AutomaticEnv()
+
+	err := v.BindEnv("DB")
+	if err != nil {
+		return nil, err
+	}
+
+	err = v.Unmarshal(&config)
+	if err != nil {
+		return nil, err
+	}
+	return config, nil
 }

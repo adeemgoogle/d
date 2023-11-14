@@ -1,4 +1,4 @@
-package author
+package handlers
 
 import (
 	"database/sql"
@@ -8,9 +8,19 @@ import (
 	"tz/internal/models"
 )
 
-func GetAuthors(s *store.AuthorDB) fiber.Handler {
+type Handlers struct {
+	Store *store.NewStoreDB
+}
+
+func NewHandlers(s *store.NewStoreDB) *Handlers {
+	return &Handlers{
+		Store: s,
+	}
+}
+
+func (h *Handlers) GetAuthors() fiber.Handler {
 	return func(ctx *fiber.Ctx) error {
-		authors, err := s.GetAuthors()
+		authors, err := h.Store.GetAuthors()
 		if err != nil {
 			return ctx.Status(500).JSON(fiber.Map{
 				"error": "select not corrct",
@@ -20,7 +30,7 @@ func GetAuthors(s *store.AuthorDB) fiber.Handler {
 	}
 }
 
-func GetAuthorsById(s *store.AuthorDB) fiber.Handler {
+func (h *Handlers) GetAuthorsById() fiber.Handler {
 	return func(c *fiber.Ctx) error {
 
 		id := c.Params("id")
@@ -31,7 +41,7 @@ func GetAuthorsById(s *store.AuthorDB) fiber.Handler {
 			})
 		}
 
-		authors, err := s.GetAuthorsById(idInt)
+		authors, err := h.Store.GetAuthorsById(idInt)
 		if err != nil {
 			return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
 				"error": "author not found",
@@ -41,7 +51,8 @@ func GetAuthorsById(s *store.AuthorDB) fiber.Handler {
 	}
 
 }
-func AuthorDelete(s *store.AuthorDB) fiber.Handler {
+
+func (h *Handlers) AuthorDelete() fiber.Handler {
 	return func(ctx *fiber.Ctx) error {
 		authorId := ctx.Params("id")
 		authorIdInt, err := strconv.Atoi(authorId)
@@ -51,13 +62,13 @@ func AuthorDelete(s *store.AuthorDB) fiber.Handler {
 				"error": "delete id err",
 			})
 		}
-		err = s.BookDelete(authorIdInt)
+		err = h.Store.BookDelete(authorIdInt)
 		if err != nil {
 			return ctx.Status(400).JSON(fiber.Map{
 				"err": "erre del",
 			})
 		}
-		err = s.AuthorDelete(authorIdInt)
+		err = h.Store.AuthorDelete(authorIdInt)
 		if err != nil {
 			return ctx.Status(400).JSON(fiber.Map{
 				"err": "erer del",
@@ -69,7 +80,8 @@ func AuthorDelete(s *store.AuthorDB) fiber.Handler {
 	}
 
 }
-func UpdAuthors(s *store.AuthorDB) fiber.Handler {
+
+func (h *Handlers) UpdAuthors() fiber.Handler {
 	return func(c *fiber.Ctx) error {
 
 		var updAuthor models.Author
@@ -89,7 +101,7 @@ func UpdAuthors(s *store.AuthorDB) fiber.Handler {
 				"message": "invalid json req",
 			})
 		}
-		err = s.UpdAuthors(authorIDint, updAuthor)
+		err = h.Store.UpdAuthors(authorIDint, updAuthor)
 		if err != nil {
 			if err == sql.ErrNoRows {
 				return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
@@ -105,7 +117,8 @@ func UpdAuthors(s *store.AuthorDB) fiber.Handler {
 		})
 	}
 }
-func CreateAuthor(s *store.AuthorDB) fiber.Handler {
+
+func (h *Handlers) CreateAuthor() fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		var author models.Author
 
@@ -114,7 +127,7 @@ func CreateAuthor(s *store.AuthorDB) fiber.Handler {
 				"message": "Not right format",
 			})
 		}
-		err := s.PostAuthor(author)
+		err := h.Store.PostAuthor(author)
 		if err != nil {
 			return c.Status(500).JSON(fiber.Map{
 				"error": "Failed to create member",
@@ -127,7 +140,8 @@ func CreateAuthor(s *store.AuthorDB) fiber.Handler {
 		})
 	}
 }
-func AuthorsBook(s *store.AuthorDB) fiber.Handler {
+
+func (h *Handlers) AuthorsBook() fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		id := c.Params("id")
 		idInt, err := strconv.Atoi(id)
@@ -137,7 +151,7 @@ func AuthorsBook(s *store.AuthorDB) fiber.Handler {
 			})
 		}
 
-		authors, err := s.AuthorsBook(idInt)
+		authors, err := h.Store.AuthorsBook(idInt)
 		if err != nil {
 			return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
 				"error": "author not found",
